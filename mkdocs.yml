@@ -1,0 +1,10 @@
+site_name: QUANTAURA-Core Documentation
+site_description: Unified research operating system documentation
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - API: api.md
+
+theme:
+  name: material
