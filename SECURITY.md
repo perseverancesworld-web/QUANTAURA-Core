@@ -1,17 +1,19 @@
 # Security Policy
 
-## Reporting Issues
+## Supported versions
 
-Please report security concerns privately to the repository owner before public disclosure.
+| Version | Supported |
+|---------|-----------|
+| 0.1.x   | Yes       |
 
-## Scope
+## Reporting a vulnerability
 
-Security reviews should focus on:
+Please open a private security advisory on GitHub or email the maintainer.
 
-- Dependency vulnerabilities
-- API security
-- Authentication and authorization
-- Data handling
-- Unsafe execution paths
+Do **not** open a public issue for security-sensitive reports.
 
-Thank you for helping improve QUANTAURA-Core.
+## Cryptographic notes (v0.1)
+
+- Ed25519 via PyNaCl
+- Canonical JSON serialization for deterministic hashing
+- Tenant public keys stored in-memory (replace with KMS / HSM in production)
