@@ -1,10 +1,37 @@
-site_name: QUANTAURA-Core Documentation
-site_description: Unified research operating system documentation
-
-nav:
-  - Home: index.md
-  - Architecture: architecture.md
-  - API: api.md
+site_name: QUANTAURA-Core
+site_description: Unified research OS + Execution Authorization Kernel
+repo_url: https://github.com/perseverancesworld-web/QUANTAURA-Core
+repo_name: perseverancesworld-web/QUANTAURA-Core
 
 theme:
   name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Architecture: architecture.md
+  - Kernel: kernel.md
+  - API: api.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
