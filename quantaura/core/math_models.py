@@ -45,7 +45,7 @@ def fractal_dimension_boxcount(
 
     if box_sizes is None:
         span = max(max_x - min_x, max_y - min_y) or 1.0
-        box_sizes = [span / (2 ** k) for k in range(1, 6)]
+        box_sizes = [span / (2**k) for k in range(1, 6)]
 
     counts = []
     for size in box_sizes:
