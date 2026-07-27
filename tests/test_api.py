@@ -1,10 +1,10 @@
 """Integration tests against the FastAPI app."""
 
 from fastapi.testclient import TestClient
-from nacl.signing import SigningKey
 
 from quantaura.api.main import app
 from quantaura.crypto.signatures import generate_keypair, canonicalize_payload
+from nacl.signing import SigningKey
 
 client = TestClient(app)
 
