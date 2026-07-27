@@ -32,9 +32,7 @@ class Portfolio:
             if abs(new_qty) < 1e-12:
                 del self.positions[symbol]
             else:
-                pos.avg_price = (
-                    (pos.avg_price * pos.quantity + price * quantity) / new_qty
-                )
+                pos.avg_price = (pos.avg_price * pos.quantity + price * quantity) / new_qty
                 pos.quantity = new_qty
         else:
             self.positions[symbol] = Position(symbol, quantity, price)

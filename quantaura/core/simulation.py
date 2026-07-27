@@ -45,9 +45,7 @@ class SimulationEngine:
 
         for i in range(1, n_steps + 1):
             state = step_fn(state, i)
-            steps.append(
-                SimulationStep(step=i, state=dict(state), timestamp=time.time())
-            )
+            steps.append(SimulationStep(step=i, state=dict(state), timestamp=time.time()))
 
         result = SimulationResult(
             sim_id=sim_id,
@@ -79,6 +77,7 @@ def nested_market_step(state: dict[str, Any], step: int) -> dict[str, Any]:
         vol = 0.05 if regime == "volatile" else 0.01
 
     import random
+
     shock = random.gauss(0, vol)
     new_price = price * (1 + shock)
 
