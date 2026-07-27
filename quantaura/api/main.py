@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from quantaura.api.routes.intents import router as intents_router
+from quantaura.api.routes.research import router as research_router
 
 app = FastAPI(
     title="QUANTAURA-Core API",
@@ -28,6 +29,7 @@ app.add_middleware(
 )
 
 app.include_router(intents_router)
+app.include_router(research_router)
 
 
 @app.get("/")
@@ -56,6 +58,7 @@ def system_status():
             "state_machine": "active",
             "policy_engine": "active",
             "intent_api": "active",
+            "research_api": "active",
         },
     }
 
