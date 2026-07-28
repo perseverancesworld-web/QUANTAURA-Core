@@ -18,21 +18,27 @@ from quantaura.ledger.state_machine import IntentStatus
 
 
 def _default_db_path() -> str:
+    env = os.environ.get("QUANTAURA_LEDGER_PATH")
+    if env == ":memory:":
+        return ":memory:"
     for candidate in (
-        os.environ.get("QUANTAURA_LEDGER_PATH"),
+        env,
         "/tmp/quantaura_ledger.db",
         str(Path.home() / ".quantaura" / "ledger.db"),
         "quantaura_ledger.db",
     ):
-        if candidate:
-            try:
-                p = Path(candidate)
-                p.parent.mkdir(parents=True, exist_ok=True)
-                with open(p, "a"):
-                    pass
-                return str(p)
-            except OSError:
-                continue
+        if not candidate:
+            continue
+        if candidate == ":memory:":
+            return ":memory:"
+        try:
+            p = Path(candidate)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            with open(p, "a"):
+                pass
+            return str(p)
+        except OSError:
+            continue
     return ":memory:"
 
 
@@ -47,8 +53,9 @@ class IntentStore:
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path, check_same_thread=False, timeout=30)
         conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("PRAGMA synchronous=NORMAL")
+        if self.db_path != ":memory:":
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("PRAGMA synchronous=NORMAL")
         return conn
 
     def _init_schema(self) -> None:
