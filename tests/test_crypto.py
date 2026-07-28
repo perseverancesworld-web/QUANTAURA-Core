@@ -14,7 +14,7 @@ def test_canonicalize_is_deterministic():
     a = canonicalize_payload(payload)
     b = canonicalize_payload(payload)
     assert a == b
-    assert a == b'{"a":1,"b":2,"nested":{"y":8,"z":9}'
+    assert a == b'{"a":1,"b":2,"nested":{"y":8,"z":9}}'
 
 
 def test_hash_is_stable():
