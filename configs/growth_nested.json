@@ -1,0 +1,15 @@
+{
+  "name": "nested_growth",
+  "model": "growth",
+  "n_steps": 5,
+  "initial_state": {"population": 100.0, "growth_rate": 0.08},
+  "metadata": {"author": "quantaura"},
+  "nested": [
+    {
+      "name": "sub_market",
+      "model": "market",
+      "n_steps": 10,
+      "initial_state": {"price": 50.0, "volatility": 0.02}
+    }
+  ]
+}
