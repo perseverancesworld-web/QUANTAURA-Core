@@ -20,7 +20,8 @@ from quantaura.ledger.state_machine import IntentStatus
 def _default_db_path() -> str:
     env = os.environ.get("QUANTAURA_LEDGER_PATH")
     if env == ":memory:":
-        return ":memory:"
+        # Shared-cache URI so multiple connections see the same DB
+        return "file:quantaura_mem?mode=memory&cache=shared"
     for candidate in (
         env,
         "/tmp/quantaura_ledger.db",
@@ -30,7 +31,7 @@ def _default_db_path() -> str:
         if not candidate:
             continue
         if candidate == ":memory:":
-            return ":memory:"
+            return "file:quantaura_mem?mode=memory&cache=shared"
         try:
             p = Path(candidate)
             p.parent.mkdir(parents=True, exist_ok=True)
@@ -39,7 +40,7 @@ def _default_db_path() -> str:
             return str(p)
         except OSError:
             continue
-    return ":memory:"
+    return "file:quantaura_mem?mode=memory&cache=shared"
 
 
 class IntentStore:
@@ -48,52 +49,58 @@ class IntentStore:
     def __init__(self, db_path: str | Path | None = None) -> None:
         self.db_path = str(db_path) if db_path is not None else _default_db_path()
         self._lock = threading.Lock()
+        self._is_memory = self.db_path.startswith("file:") or self.db_path == ":memory:"
+        # Keep one long-lived connection for in-memory DBs so schema/data persist
+        self._mem_conn: sqlite3.Connection | None = None
+        if self._is_memory:
+            self._mem_conn = sqlite3.connect(
+                self.db_path, check_same_thread=False, timeout=30, uri=True
+            )
+            self._mem_conn.row_factory = sqlite3.Row
         self._init_schema()
 
     def _connect(self) -> sqlite3.Connection:
+        if self._mem_conn is not None:
+            return self._mem_conn
         conn = sqlite3.connect(self.db_path, check_same_thread=False, timeout=30)
         conn.row_factory = sqlite3.Row
-        if self.db_path != ":memory:":
-            conn.execute("PRAGMA journal_mode=WAL")
-            conn.execute("PRAGMA synchronous=NORMAL")
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=NORMAL")
         return conn
 
     def _init_schema(self) -> None:
         with self._lock:
             conn = self._connect()
-            try:
-                conn.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS intents (
-                        intent_id     TEXT PRIMARY KEY,
-                        tenant_id     TEXT NOT NULL,
-                        action_type   TEXT NOT NULL,
-                        payload_hash  TEXT NOT NULL,
-                        status        TEXT NOT NULL,
-                        reason        TEXT,
-                        payload_json  TEXT NOT NULL,
-                        approvals     TEXT DEFAULT '[]',
-                        required_approvals INTEGER DEFAULT 1,
-                        created_at    TEXT DEFAULT (datetime('now')),
-                        updated_at    TEXT DEFAULT (datetime('now'))
-                    )
-                    """
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS intents (
+                    intent_id     TEXT PRIMARY KEY,
+                    tenant_id     TEXT NOT NULL,
+                    action_type   TEXT NOT NULL,
+                    payload_hash  TEXT NOT NULL,
+                    status        TEXT NOT NULL,
+                    reason        TEXT,
+                    payload_json  TEXT NOT NULL,
+                    approvals     TEXT DEFAULT '[]',
+                    required_approvals INTEGER DEFAULT 1,
+                    created_at    TEXT DEFAULT (datetime('now')),
+                    updated_at    TEXT DEFAULT (datetime('now'))
                 )
-                conn.execute(
-                    """
-                    CREATE TABLE IF NOT EXISTS audit_log (
-                        id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                        intent_id     TEXT NOT NULL,
-                        event         TEXT NOT NULL,
-                        actor         TEXT,
-                        detail_json   TEXT,
-                        created_at    TEXT DEFAULT (datetime('now'))
-                    )
-                    """
+                """
+            )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS audit_log (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    intent_id     TEXT NOT NULL,
+                    event         TEXT NOT NULL,
+                    actor         TEXT,
+                    detail_json   TEXT,
+                    created_at    TEXT DEFAULT (datetime('now'))
                 )
-                conn.commit()
-            finally:
-                conn.close()
+                """
+            )
+            conn.commit()
 
     def save(self, record: dict[str, Any]) -> None:
         status_val = (
@@ -103,77 +110,65 @@ class IntentStore:
         )
         with self._lock:
             conn = self._connect()
-            try:
-                conn.execute(
-                    """
-                    INSERT INTO intents (
-                        intent_id, tenant_id, action_type, payload_hash,
-                        status, reason, payload_json, approvals, required_approvals
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT(intent_id) DO UPDATE SET
-                        status = excluded.status,
-                        reason = excluded.reason,
-                        approvals = excluded.approvals,
-                        required_approvals = excluded.required_approvals,
-                        updated_at = datetime('now')
-                    """,
-                    (
-                        record["intent_id"],
-                        record["tenant_id"],
-                        record["action_type"],
-                        record["payload_hash"],
-                        status_val,
-                        record.get("reason", ""),
-                        json.dumps(record.get("payload", {})),
-                        json.dumps(record.get("approvals", [])),
-                        record.get("required_approvals", 1),
-                    ),
-                )
-                conn.commit()
-            finally:
-                conn.close()
+            conn.execute(
+                """
+                INSERT INTO intents (
+                    intent_id, tenant_id, action_type, payload_hash,
+                    status, reason, payload_json, approvals, required_approvals
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(intent_id) DO UPDATE SET
+                    status = excluded.status,
+                    reason = excluded.reason,
+                    approvals = excluded.approvals,
+                    required_approvals = excluded.required_approvals,
+                    updated_at = datetime('now')
+                """,
+                (
+                    record["intent_id"],
+                    record["tenant_id"],
+                    record["action_type"],
+                    record["payload_hash"],
+                    status_val,
+                    record.get("reason", ""),
+                    json.dumps(record.get("payload", {})),
+                    json.dumps(record.get("approvals", [])),
+                    record.get("required_approvals", 1),
+                ),
+            )
+            conn.commit()
 
     def get(self, intent_id: str) -> Optional[dict[str, Any]]:
         with self._lock:
             conn = self._connect()
-            try:
-                row = conn.execute(
-                    "SELECT * FROM intents WHERE intent_id = ?", (intent_id,)
-                ).fetchone()
-                if not row:
-                    return None
-                return self._row_to_dict(row)
-            finally:
-                conn.close()
+            row = conn.execute(
+                "SELECT * FROM intents WHERE intent_id = ?", (intent_id,)
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_dict(row)
 
     def list_for_tenant(self, tenant_id: str) -> list[dict[str, Any]]:
         with self._lock:
             conn = self._connect()
-            try:
-                rows = conn.execute(
-                    "SELECT * FROM intents WHERE tenant_id = ? ORDER BY created_at DESC",
-                    (tenant_id,),
-                ).fetchall()
-                return [self._row_to_dict(r) for r in rows]
-            finally:
-                conn.close()
+            rows = conn.execute(
+                "SELECT * FROM intents WHERE tenant_id = ? ORDER BY created_at DESC",
+                (tenant_id,),
+            ).fetchall()
+            return [self._row_to_dict(r) for r in rows]
 
     def append_audit(
         self, intent_id: str, event: str, actor: str = "", detail: Optional[dict] = None
     ) -> None:
         with self._lock:
             conn = self._connect()
-            try:
-                conn.execute(
-                    """
-                    INSERT INTO audit_log (intent_id, event, actor, detail_json)
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    (intent_id, event, actor, json.dumps(detail or {})),
-                )
-                conn.commit()
-            finally:
-                conn.close()
+            conn.execute(
+                """
+                INSERT INTO audit_log (intent_id, event, actor, detail_json)
+                VALUES (?, ?, ?, ?)
+                """,
+                (intent_id, event, actor, json.dumps(detail or {})),
+            )
+            conn.commit()
 
     @staticmethod
     def _row_to_dict(row: sqlite3.Row) -> dict[str, Any]:
