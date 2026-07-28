@@ -1,8 +1,7 @@
-"""Durable intent ledger.
+"""Durable intent ledger (SQLite).
 
-v0.1 uses SQLite for zero-config durability.
-The interface is designed so a Postgres / event-store backend
-can be swapped in without changing callers.
+Process-local default path under /tmp avoids cross-process collisions.
+Set QUANTAURA_LEDGER_PATH to override. Use QUANTAURA_LEDGER_BACKEND=postgres for Postgres.
 """
 
 from __future__ import annotations
@@ -20,13 +19,13 @@ from quantaura.ledger.state_machine import IntentStatus
 def _default_db_path() -> str:
     env = os.environ.get("QUANTAURA_LEDGER_PATH")
     if env == ":memory:":
-        # Shared-cache URI so multiple connections see the same DB
         return "file:quantaura_mem?mode=memory&cache=shared"
+    pid = os.getpid()
     for candidate in (
         env,
-        "/tmp/quantaura_ledger.db",
-        str(Path.home() / ".quantaura" / "ledger.db"),
-        "quantaura_ledger.db",
+        f"/tmp/quantaura_ledger_{pid}.db",
+        str(Path.home() / ".quantaura" / f"ledger_{pid}.db"),
+        f"quantaura_ledger_{pid}.db",
     ):
         if not candidate:
             continue
@@ -50,7 +49,6 @@ class IntentStore:
         self.db_path = str(db_path) if db_path is not None else _default_db_path()
         self._lock = threading.Lock()
         self._is_memory = self.db_path.startswith("file:") or self.db_path == ":memory:"
-        # Keep one long-lived connection for in-memory DBs so schema/data persist
         self._mem_conn: sqlite3.Connection | None = None
         if self._is_memory:
             self._mem_conn = sqlite3.connect(
