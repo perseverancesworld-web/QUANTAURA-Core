@@ -29,7 +29,7 @@ def test_approval_manager_double_vote():
     mgr = ApprovalManager()
     r1 = mgr.add_approval([], required=2, actor="alice", decision="approve")
     r2 = mgr.add_approval(r1.approvals, required=2, actor="alice", decision="approve")
-    assert "already submitted" in r2.reason.lower()
+    assert "already voted" in r2.reason.lower()
 
 
 def test_api_multi_party_approval():
