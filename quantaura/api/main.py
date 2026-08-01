@@ -10,19 +10,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from quantaura.api.routes.intents import router as intents_router
 from quantaura.api.routes.research import router as research_router
+from quantaura.config import settings
 
 app = FastAPI(
     title="QUANTAURA-Core API",
     description=(
-        "Execution Authorization Kernel + Unified research OS. "
+        "Agent Execution Authorization Kernel. "
         "No execution occurs without a verified, authorized intent."
     ),
-    version="0.1.0",
+    version="0.2.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,9 +37,11 @@ app.include_router(research_router)
 def root():
     return {
         "service": "quantaura-core",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "status": "ok",
         "kernel": "Execution Authorization Kernel",
+        "invariant": "No execution occurs without a verified, authorized intent.",
+        "environment": settings.environment,
     }
 
 
@@ -51,14 +54,20 @@ def health():
 def system_status():
     return {
         "status": "operational",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "platform": "QUANTAURA-Core",
+        "environment": settings.environment,
         "components": {
             "crypto": "active",
             "state_machine": "active",
             "policy_engine": "active",
             "intent_api": "active",
+            "audit_export": "active",
             "research_api": "active",
+        },
+        "tenancy": {
+            "allowed_tenants_configured": bool(settings.allowed_tenants),
+            "require_signature": settings.require_signature,
         },
     }
 
