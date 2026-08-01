@@ -1,20 +1,20 @@
 # Changelog
 
+## [0.2.0] — 2026-08-01
+
+### Added
+- Control-plane positioning (README, docs, landing `site/index.md`)
+- LangChain / LangGraph integration (`quantaura.integrations.langchain_tools`)
+- Audit export API: `GET /v1/intents/audit?format=json|csv`
+- Multi-tenant env config (`QUANTAURA_ALLOWED_TENANTS`, `REQUIRE_SIGNATURE`, …)
+- Commercial / design-partner docs
+- Role field on approval requests
+
+### Changed
+- Package version 0.2.0; keywords emphasize agent authorization
+
 ## [0.1.0] — 2026-07-27
 
 ### Added
-- Execution Authorization Kernel (Ed25519, policy engine, linear state machine)
-- Durable SQLite ledger with audit log; process-local paths; shared in-memory mode
-- Multi-party approvals with optional roles and timeouts
-- FastAPI surface: `/v1/intents`, `/v1/research`
-- Python SDK `@protected_action` decorator
-- Core research modules: simulation, math/entropy, cognitive architecture, quant
-- Experiment configs + nested simulation runner
-- Mock / CSV price data connectors
-- Docker multi-stage + compose profiles (incl. Postgres)
-- MkDocs documentation
-- GitHub Actions CI (pytest)
-
-### Fixed
-- Canonical JSON test assertion
-- SQLite `:memory:` connection isolation
+- Execution Authorization Kernel (Ed25519, policy, FSM, SQLite ledger)
+- Multi-party approvals, research modules, Docker, MkDocs, CI
