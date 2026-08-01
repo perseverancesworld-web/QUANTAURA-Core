@@ -1,5 +1,5 @@
 site_name: QUANTAURA-Core
-site_description: Unified research OS + Execution Authorization Kernel
+site_description: Agent Execution Authorization Kernel — control plane for AI agents
 repo_url: https://github.com/perseverancesworld-web/QUANTAURA-Core
 repo_name: perseverancesworld-web/QUANTAURA-Core
 
@@ -25,9 +25,11 @@ theme:
 nav:
   - Home: index.md
   - Quickstart: quickstart.md
-  - Architecture: architecture.md
   - Kernel: kernel.md
+  - Architecture: architecture.md
+  - Integrations: integrations.md
   - API: api.md
+  - Commercial: commercial.md
   - Contributing: contributing.md
 
 markdown_extensions:
