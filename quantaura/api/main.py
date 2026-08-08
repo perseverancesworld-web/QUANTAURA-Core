@@ -12,6 +12,7 @@ from quantaura.api.routes.intents import router as intents_router
 from quantaura.api.routes.research import router as research_router
 from quantaura.api.routes.qpie import router as qpie_router
 from quantaura.config import settings
+from quantaura.api.middleware.security import APIKeyMiddleware, RateLimitMiddleware
 
 app = FastAPI(
     title="QUANTAURA-Core API",
@@ -19,9 +20,11 @@ app = FastAPI(
         "Agent Execution Authorization Kernel + QPIE Physical Intelligence Engine. "
         "No execution occurs without a verified, authorized intent."
     ),
-    version="0.4.0",
+    version="0.4.1",
 )
 
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(APIKeyMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -39,7 +42,7 @@ app.include_router(qpie_router)
 def root():
     return {
         "service": "quantaura-core",
-        "version": "0.4.0",
+        "version": "0.4.1",
         "status": "ok",
         "kernel": "Execution Authorization Kernel",
         "qpie": "Physical Intelligence Engine",
@@ -57,7 +60,7 @@ def health():
 def system_status():
     return {
         "status": "operational",
-        "version": "0.4.0",
+        "version": "0.4.1",
         "platform": "QUANTAURA-Core",
         "environment": settings.environment,
         "components": {
@@ -72,6 +75,9 @@ def system_status():
         "tenancy": {
             "allowed_tenants_configured": bool(settings.allowed_tenants),
             "require_signature": settings.require_signature,
+            "api_keys_configured": settings.api_keys_configured,
+            "rate_limit_per_min": settings.rate_limit_per_min,
+            "policy_pack": settings.policy_pack or "default",
         },
     }
 
