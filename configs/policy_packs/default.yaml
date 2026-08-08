@@ -1,0 +1,16 @@
+# Default policy pack — safe baseline for demos
+name: default
+version: "1"
+actions:
+  TRANSFER_FUNDS:
+    max_amount: 1000.0
+    require_human: true
+  DATABASE_WRITE:
+    require_human: false
+  SIMULATION_RUN:
+    require_human: false
+  QUANT_TRADE:
+    max_amount: 5000.0
+    require_human: true
+  AGENT_TOOL_CALL:
+    require_human: false

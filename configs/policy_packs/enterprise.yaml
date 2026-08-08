@@ -1,0 +1,18 @@
+# Stricter pack for regulated / multi-party environments
+name: enterprise
+version: "1"
+actions:
+  TRANSFER_FUNDS:
+    max_amount: 100.0
+    require_human: true
+  DATABASE_WRITE:
+    require_human: true
+  SIMULATION_RUN:
+    require_human: false
+  QUANT_TRADE:
+    max_amount: 500.0
+    require_human: true
+  AGENT_TOOL_CALL:
+    require_human: true
+  PRODUCTION_DEPLOY:
+    require_human: true
