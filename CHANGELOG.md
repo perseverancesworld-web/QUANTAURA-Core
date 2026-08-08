@@ -1,30 +1,21 @@
 # Changelog
 
+## [0.5.1] — 2026-08-08
+
+### Added
+- Skyrmion Q grid-refinement study + `/v1/qpie/topology/refinement`
+- TN adapter contract (`ExactTNProxy`, truncated subspace) + `/v1/qpie/tn/*`
+- Route-registration smoke test for QPIE endpoints
+
+### Fixed
+- CI 404 on `/v1/qpie/schwinger/sparse` (tests landed before routes on intermediate commit; routes confirmed on main)
+
+## [0.5.0] — 2026-08-08
+
+### Added
+- DEC conservation, sparse Schwinger ED, topology validation, scientific ledger
+
 ## [0.4.1] — 2026-08-08
 
 ### Added
-- YAML **policy packs** (`configs/policy_packs/default.yaml`, `enterprise.yaml`)
-- **API key** middleware (`QUANTAURA_API_KEYS` / `X-API-Key`)
-- **Rate limit** middleware (`QUANTAURA_RATE_LIMIT_PER_MIN`)
-- Docker **demo/prod/dev** profiles aligned with multi-stage Dockerfile
-- `docs/deploy.md`, `.env.example`, example `fly.toml`
-
-## [0.4.0] — 2026-08-08
-
-### Added
-- QPIE DEC, Schwinger ED, research API, telemetry, hypothesis store, VQE stub
-
-## [0.3.0] — 2026-08-08
-
-### Added
-- QPIE-27 scaffold
-
-## [0.2.0] — 2026-08-01
-
-### Added
-- Control-plane packaging, LangChain, audit export
-
-## [0.1.0] — 2026-07-27
-
-### Added
-- Execution Authorization Kernel
+- Policy packs, API keys, rate limit, demo Docker profiles

@@ -37,9 +37,23 @@ def test_benchmarks_include_dec():
     assert "dec_conservation" in {r["name"] for r in run_all_benchmarks()}
 
 
+def test_qpie_routes_registered():
+    paths = {getattr(r, "path", "") for r in app.routes}
+    for required in (
+        "/v1/qpie/schwinger/sparse",
+        "/v1/qpie/dec/conservation",
+        "/v1/qpie/schwinger/cross_validate",
+        "/v1/qpie/ledger/evidence",
+        "/v1/qpie/topology/refinement",
+        "/v1/qpie/tn/cross_validate",
+    ):
+        assert required in paths, f"missing route {required}; have={sorted(p for p in paths if p.startswith('/v1/qpie'))}"
+
+
 def test_api_v05():
     client = TestClient(app)
-    assert client.post("/v1/qpie/schwinger/sparse", json={"n_sites": 3}).status_code == 200
+    r = client.post("/v1/qpie/schwinger/sparse", json={"n_sites": 3})
+    assert r.status_code == 200, r.text
     c = client.get("/v1/qpie/dec/conservation")
     assert c.status_code == 200 and c.json()["passed"] is True
     x = client.get("/v1/qpie/schwinger/cross_validate?n_sites=3")
