@@ -6,10 +6,11 @@
 
 ## Start here
 
-1. [Quickstart](quickstart.md) — run the API in under a minute  
-2. [Kernel](kernel.md) — state machine, policy, crypto  
-3. [Integrations](integrations.md) — LangChain / LangGraph  
-4. [Commercial](commercial.md) — packaging & design partners  
-5. [API](api.md) — HTTP surface including audit export  
+1. [Quickstart](quickstart.md)
+2. [Kernel](kernel.md) — crypto, policy, ledger, SDK
+3. [QPIE](qpie.md) — Physical Intelligence Engine (DEC, gauge, Schwinger, firewall)
+4. [Integrations](integrations.md) — LangChain / LangGraph
+5. [API](api.md)
+6. [Commercial](commercial.md)
 
-Research modules (simulation, quant, cognitive) live under `quantaura/core/` for teams building agentic research systems on top of the same authorization loop.
+Package version **0.4.0**.

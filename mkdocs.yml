@@ -1,5 +1,5 @@
 site_name: QUANTAURA-Core
-site_description: Agent Execution Authorization Kernel — control plane for AI agents
+site_description: Agent Execution Authorization Kernel + QPIE Physical Intelligence Engine
 repo_url: https://github.com/perseverancesworld-web/QUANTAURA-Core
 repo_name: perseverancesworld-web/QUANTAURA-Core
 
@@ -26,6 +26,7 @@ nav:
   - Home: index.md
   - Quickstart: quickstart.md
   - Kernel: kernel.md
+  - QPIE: qpie.md
   - Architecture: architecture.md
   - Integrations: integrations.md
   - API: api.md

@@ -1,42 +1,35 @@
-# QPIE-27 — QUANTAURA Physical Intelligence Engine
+# QPIE — Physical Intelligence Engine
 
-A **computational laboratory for discovering emergent physics** in coupled systems.
+Computational laboratory for **coupled physical systems**. PRISM-MATTER is a material subsystem inside the state-space.
 
-PRISM-MATTER is the programmable-material **subsystem**. The central object is not a material — it is a **state-space of physical systems**.
+## Invariants
 
-## Layers
+1. **Mathematical:** DEC incidence satisfies d1 d0 = 0 on the grid complex.
+2. **Scientific:** Firewall never auto-assigns Tier 5 ("new physical law").
+3. **Operational:** Side effects still require the **Execution Authorization Kernel**.
 
-| Layer | Module | Role |
-|-------|--------|------|
-| State-space | `qpie.state_space` | Geometry, fields, matter, topology, information, BC |
-| Common geometry | `qpie.geometry` | Shared DEC-oriented representation |
-| Gauge | `qpie.gauge` | U(1) links, plaquette holonomy, Wilson action |
-| Topology | `qpie.topology` | Hopf / skyrmion discrete proxies |
-| Vortex | `qpie.vortex` | Vorticity, helicity |
-| Causal physics | `qpie.causal` | `do(X=x)` interventions |
-| Transition algebra | `qpie.transition` | Certificates on transitions |
-| Discovery objective | `qpie.discovery` | Score informative experiments |
-| Firewall | `qpie.firewall` | Tier 0–5; no auto Tier-5 claims |
-| Observatory | `qpie.observatory` | Physical-state agents |
-| PRISM-MATTER | `qpie.prism` | Material configurations inside state-space |
-| Benchmarks | `qpie.benchmarks` | Known-solution calibration |
-| Adapters | `qpie.adapters` | Classical (quantum/lab later) |
-
-## Firewall
-
-Simulation anomalies are **never** promoted to “new physics” by the engine. Tier 5 requires human scientific process.
-
-## Quick check
+## Quick checks
 
 ```python
-from quantaura.qpie import run_all_benchmarks, LatticeGaugeU1, default_physics_graph
+from quantaura.qpie import run_all_benchmarks, LatticeGaugeU1
+from quantaura.qpie.dec import GridComplex2D
+from quantaura.qpie.schwinger import exact_spectrum
 
 print(run_all_benchmarks())
-g = LatticeGaugeU1.zeros(8, 8)
-print(g.wilson_action())  # 0.0
-print(default_physics_graph().do("geometry", 1.5).observed_effects)
+c = GridComplex2D(6, 6)
+assert abs((c.incidence_d1() @ c.incidence_d0()).max()) < 1e-12
+print(exact_spectrum(3).gap)
 ```
 
-## Relation to the Execution Authorization Kernel
+```bash
+python examples/qpie_demo.py
+curl localhost:8000/v1/qpie/benchmarks
+```
 
-QPIE proposes experiments. Fabrication, actuation, and other side effects still require **authorized intents**.
+## Durable registry
+
+```bash
+export QUANTAURA_QPIE_STORE=/tmp/qpie.sqlite
+```
+
+Hypotheses and anomalies persist when a file path is set (default `:memory:`).
