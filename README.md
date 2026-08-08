@@ -15,7 +15,9 @@ When an agent (or any caller) wants a side effect — transfer funds, write a da
 
 Audit trail is durable. Exports are CSV/JSON. Tenants are isolated.
 
-This is the product wedge. Research modules (simulation, quant, cognitive scaffolds) ship alongside for teams building agentic research systems.
+This is the **product wedge**. Alongside it ships **QPIE** (Physical Intelligence Engine) — a computational laboratory for coupled physical systems — plus simulation, quant, and cognitive scaffolds.
+
+**Current package version:** `0.4.0`
 
 ---
 
@@ -90,6 +92,40 @@ curl -H "X-Tenant-ID: agent-001" "http://localhost:8000/v1/intents/audit"
 curl -H "X-Tenant-ID: agent-001" "http://localhost:8000/v1/intents/audit?format=csv" -o audit.csv
 ```
 
+## QPIE — Physical Intelligence Engine
+
+Research stack for **state-spaces of coupled physical systems** (not “optimize one material”):
+
+- Common geometry / **DEC** incidence complex with \(d^2 = 0\)
+- **U(1) lattice gauge** (plaquettes, Wilson action)
+- Topology proxies (Hopf / skyrmion), vortex **helicity**
+- Causal graph with `do(X=x)` interventions
+- Transition certificates + **known-physics firewall** (Tier 0–5; no auto Tier-5 claims)
+- Schwinger-like **exact diagonalization** lab (small systems)
+- Hypothesis registry, anomalies, active experiment selection
+- Telemetry manifests (sim ↔ measure pairing)
+
+```bash
+curl localhost:8000/v1/qpie/benchmarks
+curl localhost:8000/v1/qpie/dec/status
+curl -X POST localhost:8000/v1/qpie/schwinger/spectrum \
+  -H 'content-type: application/json' -d '{"n_sites":3}'
+```
+
+```python
+from quantaura.qpie import run_all_benchmarks, LatticeGaugeU1
+from quantaura.qpie.dec import GridComplex2D
+
+print(run_all_benchmarks())
+print(LatticeGaugeU1.zeros(8, 8).wilson_action())  # 0.0
+c = GridComplex2D(6, 6)
+assert (c.incidence_d1() @ c.incidence_d0()).max() == 0
+```
+
+Docs: [docs/qpie.md](docs/qpie.md)
+
+QPIE **proposes** experiments; the **Execution Authorization Kernel** still decides whether anything physical or privileged may run.
+
 ## Architecture
 
 ```
@@ -106,6 +142,9 @@ Agent / LangChain tool
               AUTHORIZED --> execute --> COMMITTED
               PENDING --> human / multi-party gate
               REJECTED
+
+Research / discovery (no side effects required):
+  POST/GET /v1/qpie/*   DEC · gauge · Schwinger · topology · hypotheses
 ```
 
 ## Modules
@@ -115,14 +154,15 @@ Agent / LangChain tool
 | `quantaura/crypto/` | Canonical JSON + Ed25519 |
 | `quantaura/ledger/` | State machine + SQLite/Postgres + audit export |
 | `quantaura/policy/` | Rules + roles + timeouts |
-| `quantaura/api/` | FastAPI (`/v1/intents`, `/v1/research`) |
+| `quantaura/api/` | FastAPI (`/v1/intents`, `/v1/research`, `/v1/qpie`) |
 | `quantaura/sdk/` | `@protected_action` decorator |
 | `quantaura/integrations/` | LangChain / LangGraph wrappers |
-| `quantaura/core/` | Simulation, math, cognitive, quant (research OS) |
+| `quantaura/qpie/` | Physical Intelligence Engine (DEC, gauge, Schwinger, firewall, …) |
+| `quantaura/core/` | Simulation, math, cognitive, quant scaffolds |
 
 ## Commercial
 
-- **Open source (MIT):** self-host the full kernel  
+- **Open source (MIT):** self-host the full kernel + QPIE  
 - **Hosted / Pro:** multi-tenant control plane, audit retention, support  
 - **Enterprise:** SSO, custom roles, SLA, on-prem  
 
