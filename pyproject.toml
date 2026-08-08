@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantaura-core"
-version = "0.3.0"
-description = "Agent Execution Authorization Kernel + QPIE-27 Physical Intelligence Engine for emergent physics discovery."
+version = "0.4.0"
+description = "Agent Execution Authorization Kernel + QPIE Physical Intelligence Engine for emergent physics discovery."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -16,22 +16,15 @@ keywords = [
   "agent-authorization",
   "ai-agents",
   "control-plane",
-  "policy",
-  "intent",
-  "ed25519",
-  "langchain",
-  "governance",
-  "audit",
-  "multi-party-approval",
   "physical-intelligence",
   "gauge-theory",
   "topology",
+  "discrete-exterior-calculus",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "Intended Audience :: Science/Research",
-  "Intended Audience :: Information Technology",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
@@ -39,7 +32,6 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Topic :: Security",
   "Topic :: Scientific/Engineering :: Physics",
-  "Topic :: Software Development :: Libraries",
 ]
 
 dependencies = [
@@ -60,35 +52,19 @@ dev = [
   "mkdocs-material>=9.0.0",
   "ruff>=0.9.0",
 ]
-langchain = [
-  "langchain-core>=0.2.0",
-]
-postgres = [
-  "psycopg[binary]>=3.1.0",
-]
+langchain = ["langchain-core>=0.2.0"]
+postgres = ["psycopg[binary]>=3.1.0"]
 
 [project.scripts]
 quantaura-serve = "quantaura.api.main:cli_serve"
 
 [project.urls]
 Homepage = "https://github.com/perseverancesworld-web/QUANTAURA-Core"
-Documentation = "https://github.com/perseverancesworld-web/QUANTAURA-Core/tree/main/docs"
-Issues = "https://github.com/perseverancesworld-web/QUANTAURA-Core/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["quantaura*"]
 exclude = ["tests*", "examples*", "site*"]
-
-[tool.black]
-line-length = 100
-target-version = ["py310", "py311", "py312"]
-
-[tool.ruff]
-line-length = 100
-target-version = "py310"
-select = ["E", "F", "I", "N", "W"]
-ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

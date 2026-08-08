@@ -1,26 +1,27 @@
 # Changelog
 
+## [0.4.0] — 2026-08-08
+
+### Added
+- **DEC**: `qpie/dec` — GridComplex2D, incidence d0/d1, d²=0, grad/curl/div proxies
+- **Schwinger lab**: spin-chain Hamiltonian + exact diagonalization spectrum reports
+- **Research API**: `/v1/qpie/*` benchmarks, wilson, schwinger, topology, discovery, DEC, hypotheses, telemetry
+- **Telemetry manifests** + sensor schema + sim/measure pairing
+- **Hypothesis registry** + **Anomaly** objects
+- **Active experiment selection** (info-gain / cost)
+- **Cross-solver validation** helper
+
 ## [0.3.0] — 2026-08-08
 
 ### Added
-- **QPIE-27** (`quantaura/qpie/`): Physical Intelligence Engine
-  - State-space X, common geometry, U(1) gauge / plaquettes
-  - Topology proxies (Hopf/skyrmion), vortex helicity
-  - Causal physics graph with `do(X=x)`
-  - Transition algebra + certificates
-  - Discovery objective J
-  - Known-physics firewall (Tier 0–5)
-  - Observatory physical-state agents
-  - PRISM-MATTER material subsystem
-  - Known-solution benchmarks + classical adapter
-- Docs: `docs/qpie.md`
+- QPIE-27 scaffold (state-space, gauge, topology, vortex, causal, firewall, PRISM-MATTER)
 
 ## [0.2.0] — 2026-08-01
 
 ### Added
-- Control-plane positioning, LangChain integration, audit export, multi-tenant config
+- Control-plane packaging, LangChain, audit export, multi-tenant
 
 ## [0.1.0] — 2026-07-27
 
 ### Added
-- Execution Authorization Kernel, research modules, Docker, MkDocs, CI
+- Execution Authorization Kernel
