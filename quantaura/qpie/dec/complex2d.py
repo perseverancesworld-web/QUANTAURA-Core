@@ -1,4 +1,4 @@
-"""2D periodic primal complex with incidence matrices d0, d1; d1@d0=0."""
+"""2D periodic primal complex — DEC v0.5 with Hodge + conservation."""
 
 from __future__ import annotations
 
@@ -68,13 +68,20 @@ class GridComplex2D:
     def hodge_star_2(self) -> np.ndarray:
         return np.eye(self.n2) / (self.spacing**2)
 
+    def codifferential_1(self) -> np.ndarray:
+        d0 = self.incidence_d0()
+        return -np.linalg.inv(self.hodge_star_0()) @ d0.T @ self.hodge_star_1()
+
+    def laplacian_0(self) -> np.ndarray:
+        return self.codifferential_1() @ self.incidence_d0()
+
 
 def exterior_derivative(complex2d: GridComplex2D, form_degree: int, values: np.ndarray) -> np.ndarray:
     if form_degree == 0:
         return complex2d.incidence_d0() @ values.reshape(-1)
     if form_degree == 1:
         return complex2d.incidence_d1() @ values.reshape(-1)
-    raise ValueError("Only d0 and d1 supported on 2D complex")
+    raise ValueError("Only d0 and d1 supported")
 
 
 def discrete_gradient(complex2d: GridComplex2D, scalar: np.ndarray) -> np.ndarray:
@@ -86,5 +93,20 @@ def discrete_curl(complex2d: GridComplex2D, edge_form: np.ndarray) -> np.ndarray
 
 
 def discrete_div(complex2d: GridComplex2D, edge_form: np.ndarray) -> np.ndarray:
-    d0 = complex2d.incidence_d0()
-    return -(d0.T @ edge_form.reshape(-1))
+    return complex2d.codifferential_1() @ edge_form.reshape(-1)
+
+
+def conservation_report(complex2d: GridComplex2D, rng: np.random.Generator | None = None) -> dict:
+    rng = rng or np.random.default_rng(0)
+    d0, d1 = complex2d.incidence_d0(), complex2d.incidence_d1()
+    d2_res = float(np.max(np.abs(d1 @ d0)))
+    f = rng.standard_normal(complex2d.n0)
+    curl_grad = float(np.max(np.abs(discrete_curl(complex2d, discrete_gradient(complex2d, f)))))
+    L = complex2d.laplacian_0()
+    sym = float(np.max(np.abs(L - L.T)))
+    return {
+        "d2_residual": d2_res,
+        "curl_grad_residual": curl_grad,
+        "laplacian_asymmetry": sym,
+        "passed": d2_res < 1e-12 and curl_grad < 1e-10 and sym < 1e-10,
+    }

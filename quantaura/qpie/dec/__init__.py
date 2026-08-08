@@ -1,6 +1,11 @@
-"""Discrete Exterior Calculus kernel — incidence matrices and d²=0."""
-
-from .complex2d import GridComplex2D, exterior_derivative, discrete_gradient, discrete_curl, discrete_div
+from .complex2d import (
+    GridComplex2D,
+    exterior_derivative,
+    discrete_gradient,
+    discrete_curl,
+    discrete_div,
+    conservation_report,
+)
 
 __all__ = [
     "GridComplex2D",
@@ -8,4 +13,5 @@ __all__ = [
     "discrete_gradient",
     "discrete_curl",
     "discrete_div",
+    "conservation_report",
 ]
