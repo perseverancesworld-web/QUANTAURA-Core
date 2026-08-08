@@ -10,14 +10,19 @@ from pydantic import BaseModel, Field
 from quantaura.qpie.adapters.classical import run_gauge_wilson_scan
 from quantaura.qpie.adapters.vqe import classical_variational_stub
 from quantaura.qpie.benchmarks.known_solutions import run_all_benchmarks
-from quantaura.qpie.dec.complex2d import GridComplex2D
-from quantaura.qpie.schwinger.hamiltonian import spectral_report
+from quantaura.qpie.dec.complex2d import GridComplex2D, conservation_report
+from quantaura.qpie.schwinger.hamiltonian import (
+    spectral_report,
+    sparse_spectrum,
+    cross_validate_dense_sparse,
+)
 from quantaura.qpie.topology import hopf_proxy_3d
 from quantaura.qpie.discovery import score_experiment
 from quantaura.qpie.active import ExperimentCandidate, select_next_experiment
 from quantaura.qpie.telemetry.manifest import ExperimentManifest, new_run_id
 from quantaura.qpie.hypothesis import Hypothesis, Anomaly
 from quantaura.qpie.store.sqlite_registry import store as qpie_store
+from quantaura.qpie.ledger.scientific import sci_ledger, EvidenceRecord
 import numpy as np
 
 router = APIRouter(prefix="/v1/qpie", tags=["QPIE"])
@@ -75,11 +80,11 @@ class AnomalyIn(BaseModel):
 @router.get("/benchmarks")
 def qpie_benchmarks() -> dict[str, Any]:
     results = run_all_benchmarks()
-    c = GridComplex2D(6, 6)
-    d0, d1 = c.incidence_d0(), c.incidence_d1()
-    residual = float(np.max(np.abs(d1 @ d0)))
-    results.append({"name": "dec_d2_zero", "passed": residual < 1e-12, "max_abs_d1d0": residual})
-    return {"run_id": new_run_id(), "results": results, "all_passed": all(r.get("passed", False) for r in results)}
+    return {
+        "run_id": new_run_id(),
+        "results": results,
+        "all_passed": all(r.get("passed", False) for r in results),
+    }
 
 
 @router.post("/gauge/wilson")
@@ -93,6 +98,25 @@ def qpie_schwinger(body: SchwingerRequest) -> dict[str, Any]:
     report = spectral_report(body.n_sites, body.m, body.h)
     report["run_id"] = new_run_id()
     return report
+
+
+@router.post("/schwinger/sparse")
+def qpie_schwinger_sparse(body: SchwingerRequest) -> dict[str, Any]:
+    report = sparse_spectrum(body.n_sites, body.m, body.h).to_dict()
+    report["run_id"] = new_run_id()
+    sci_ledger.append(
+        EvidenceRecord.create(
+            "simulation", report, run_id=report["run_id"], solver=report.get("backend", "sparse")
+        )
+    )
+    return report
+
+
+@router.get("/schwinger/cross_validate")
+def qpie_schwinger_cross(n_sites: int = 4, m: float = 0.5, h: float = 0.1) -> dict[str, Any]:
+    result = cross_validate_dense_sparse(n_sites, m, h)
+    result["run_id"] = new_run_id()
+    return result
 
 
 @router.get("/topology/hopf_proxy")
@@ -165,6 +189,13 @@ def qpie_dec_status() -> dict[str, Any]:
     }
 
 
+@router.get("/dec/conservation")
+def qpie_dec_conservation() -> dict[str, Any]:
+    rep = conservation_report(GridComplex2D(8, 8))
+    rep["run_id"] = new_run_id()
+    return rep
+
+
 @router.post("/hypotheses")
 def register_hypothesis(body: HypothesisIn) -> dict[str, Any]:
     h = Hypothesis.create(
@@ -211,3 +242,8 @@ def register_anomaly(body: AnomalyIn) -> dict[str, Any]:
 @router.get("/anomalies")
 def list_anomalies() -> list[dict[str, Any]]:
     return qpie_store.list_anomalies()
+
+
+@router.get("/ledger/evidence")
+def list_evidence(kind: str | None = None) -> list[dict[str, Any]]:
+    return sci_ledger.list(kind=kind)
