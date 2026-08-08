@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from quantaura.qpie.adapters.classical import run_gauge_wilson_scan
+from quantaura.qpie.adapters.vqe import classical_variational_stub
 from quantaura.qpie.benchmarks.known_solutions import run_all_benchmarks
 from quantaura.qpie.dec.complex2d import GridComplex2D
 from quantaura.qpie.schwinger.hamiltonian import spectral_report
@@ -15,11 +16,11 @@ from quantaura.qpie.topology import hopf_proxy_3d
 from quantaura.qpie.discovery import score_experiment
 from quantaura.qpie.active import ExperimentCandidate, select_next_experiment
 from quantaura.qpie.telemetry.manifest import ExperimentManifest, new_run_id
-from quantaura.qpie.hypothesis import Hypothesis, HypothesisRegistry
+from quantaura.qpie.hypothesis import Hypothesis, Anomaly
+from quantaura.qpie.store.sqlite_registry import store as qpie_store
 import numpy as np
 
 router = APIRouter(prefix="/v1/qpie", tags=["QPIE"])
-_registry = HypothesisRegistry()
 
 
 class WilsonRequest(BaseModel):
@@ -56,6 +57,21 @@ class HypothesisIn(BaseModel):
     falsification_criteria: list[str] = Field(default_factory=list)
 
 
+class VQEStubRequest(BaseModel):
+    n_sites: int = Field(3, ge=2, le=8)
+    m: float = 0.5
+    h: float = 0.1
+    n_samples: int = Field(20, ge=1, le=200)
+    seed: int = 0
+
+
+class AnomalyIn(BaseModel):
+    description: str
+    hypothesis_id: str = ""
+    solver: str = ""
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
 @router.get("/benchmarks")
 def qpie_benchmarks() -> dict[str, Any]:
     results = run_all_benchmarks()
@@ -86,7 +102,13 @@ def qpie_hopf(n: int = 6) -> dict[str, Any]:
     field = np.zeros((n, n, n, 3))
     field[..., 2] = 1.0
     rep = hopf_proxy_3d(field)
-    return {"run_id": new_run_id(), "hopf_proxy": rep.hopf_proxy, "mean_norm": rep.mean_norm, "energy_proxy": rep.energy_proxy, "notes": rep.notes}
+    return {
+        "run_id": new_run_id(),
+        "hopf_proxy": rep.hopf_proxy,
+        "mean_norm": rep.mean_norm,
+        "energy_proxy": rep.energy_proxy,
+        "notes": rep.notes,
+    }
 
 
 @router.post("/discovery/score")
@@ -133,7 +155,14 @@ def qpie_dec_status() -> dict[str, Any]:
     c = GridComplex2D(8, 8)
     d0, d1 = c.incidence_d0(), c.incidence_d1()
     residual = float(np.max(np.abs(d1 @ d0)))
-    return {"run_id": new_run_id(), "n0": c.n0, "n1": c.n1, "n2": c.n2, "d2_residual": residual, "d2_is_zero": residual < 1e-12}
+    return {
+        "run_id": new_run_id(),
+        "n0": c.n0,
+        "n1": c.n1,
+        "n2": c.n2,
+        "d2_residual": residual,
+        "d2_is_zero": residual < 1e-12,
+    }
 
 
 @router.post("/hypotheses")
@@ -144,16 +173,41 @@ def register_hypothesis(body: HypothesisIn) -> dict[str, Any]:
         predicted_observables=body.predicted_observables,
         falsification_criteria=body.falsification_criteria,
     )
-    _registry.register(h)
+    qpie_store.save_hypothesis(h)
     return h.to_dict()
 
 
 @router.get("/hypotheses")
 def list_hypotheses() -> list[dict[str, Any]]:
-    return _registry.list()
+    return qpie_store.list_hypotheses()
 
 
 @router.post("/telemetry/manifest")
 def create_manifest(title: str = "untitled", solver: str = "classical") -> dict[str, Any]:
     m = ExperimentManifest(run_id=new_run_id(), title=title, solver=solver)
     return m.to_dict()
+
+
+@router.post("/vqe/stub")
+def qpie_vqe_stub(body: VQEStubRequest) -> dict[str, Any]:
+    result = classical_variational_stub(body.n_sites, body.m, body.h, body.n_samples, body.seed)
+    out = result.to_dict()
+    out["run_id"] = new_run_id()
+    return out
+
+
+@router.post("/anomalies")
+def register_anomaly(body: AnomalyIn) -> dict[str, Any]:
+    a = Anomaly.create(
+        body.description,
+        hypothesis_id=body.hypothesis_id,
+        solver=body.solver,
+        parameters=body.parameters,
+    )
+    qpie_store.save_anomaly(a)
+    return a.to_dict()
+
+
+@router.get("/anomalies")
+def list_anomalies() -> list[dict[str, Any]]:
+    return qpie_store.list_anomalies()
