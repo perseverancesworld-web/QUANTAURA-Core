@@ -10,6 +10,8 @@ from quantaura.qpie.vortex import helicity_3d
 from quantaura.qpie.firewall import classify_candidate, DiscoveryTier, assert_not_new_physics
 from quantaura.qpie.dec.complex2d import GridComplex2D, conservation_report
 from quantaura.qpie.topology import topology_validation_suite
+from quantaura.qpie.benchmarks.refinement import skyrmion_q_vs_resolution
+from quantaura.qpie.adapters.tensor_network import cross_validate_ed_tn
 
 
 def test_plaquette_identity_flat() -> dict[str, Any]:
@@ -55,6 +57,11 @@ def run_all_benchmarks() -> list[dict[str, Any]]:
         test_dec_conservation(),
     ]
     results.extend(topology_validation_suite())
+    results.append(skyrmion_q_vs_resolution([16, 24, 32, 48]))
+    try:
+        results.append(cross_validate_ed_tn(4))
+    except Exception as exc:  # pragma: no cover
+        results.append({"name": "ed_vs_tn_cross_validate", "passed": False, "error": str(exc)})
     try:
         from quantaura.qpie.schwinger.hamiltonian import cross_validate_dense_sparse
 
