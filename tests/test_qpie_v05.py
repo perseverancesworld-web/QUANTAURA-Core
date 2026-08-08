@@ -38,16 +38,18 @@ def test_benchmarks_include_dec():
 
 
 def test_qpie_routes_registered():
-    paths = {getattr(r, "path", "") for r in app.routes}
-    for required in (
+    """Use OpenAPI paths — APIRouter prefix is not always visible on route.path."""
+    paths = set(app.openapi().get("paths", {}).keys())
+    required = (
         "/v1/qpie/schwinger/sparse",
         "/v1/qpie/dec/conservation",
         "/v1/qpie/schwinger/cross_validate",
         "/v1/qpie/ledger/evidence",
         "/v1/qpie/topology/refinement",
         "/v1/qpie/tn/cross_validate",
-    ):
-        assert required in paths, f"missing route {required}; have={sorted(p for p in paths if p.startswith('/v1/qpie'))}"
+    )
+    missing = [p for p in required if p not in paths]
+    assert not missing, f"missing OpenAPI paths {missing}; qpie={sorted(p for p in paths if p.startswith('/v1/qpie'))}"
 
 
 def test_api_v05():
