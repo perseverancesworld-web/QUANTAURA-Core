@@ -9,7 +9,9 @@ from pydantic import BaseModel, Field
 
 from quantaura.qpie.adapters.classical import run_gauge_wilson_scan
 from quantaura.qpie.adapters.vqe import classical_variational_stub
+from quantaura.qpie.adapters.tensor_network import cross_validate_ed_tn, cross_validate_sparse_tn
 from quantaura.qpie.benchmarks.known_solutions import run_all_benchmarks
+from quantaura.qpie.benchmarks.refinement import skyrmion_q_vs_resolution
 from quantaura.qpie.dec.complex2d import GridComplex2D, conservation_report
 from quantaura.qpie.schwinger.hamiltonian import (
     spectral_report,
@@ -133,6 +135,32 @@ def qpie_hopf(n: int = 6) -> dict[str, Any]:
         "energy_proxy": rep.energy_proxy,
         "notes": rep.notes,
     }
+
+
+@router.get("/topology/refinement")
+def qpie_skyrmion_refinement() -> dict[str, Any]:
+    result = skyrmion_q_vs_resolution([16, 24, 32, 48, 64])
+    result["run_id"] = new_run_id()
+    sci_ledger.append(
+        EvidenceRecord.create(
+            "benchmark", result, run_id=result["run_id"], solver="topology_refinement"
+        )
+    )
+    return result
+
+
+@router.get("/tn/cross_validate")
+def qpie_tn_cross(n_sites: int = 4, m: float = 0.5, h: float = 0.1) -> dict[str, Any]:
+    result = cross_validate_ed_tn(n_sites, m, h)
+    result["run_id"] = new_run_id()
+    return result
+
+
+@router.get("/tn/sparse_cross")
+def qpie_tn_sparse(n_sites: int = 5, m: float = 0.5, h: float = 0.1) -> dict[str, Any]:
+    result = cross_validate_sparse_tn(n_sites, m, h)
+    result["run_id"] = new_run_id()
+    return result
 
 
 @router.post("/discovery/score")
