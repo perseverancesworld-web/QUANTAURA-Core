@@ -51,3 +51,19 @@ pytest -q tests/test_qpie_resonance_bridge.py
 2. Run edge-failure sweeps with identical source conditions and declared material models.
 3. Compare geometric-neighbor changes against mechanical-bond failure without conflating the two graphs.
 4. Establish matched classical baselines before making claims about phase effects, quantum coupling, or emergent dynamics.
+
+## Matched-budget controller benchmark
+
+`run_controller_benchmark` compares three one-step kinematic controllers on a fixed node set:
+
+1. Global gradient: each node uses its own residual plus global mean residual information.
+2. Local geometric neighbor: each node uses neighbors from Delaunay adjacency (or explicit geometric edges).
+3. Topology-aware local: each node uses persistent mechanical bonds, weighted by declared bond stiffness.
+
+Each controller receives the same targets, initial positions, and total displacement budget. That budget is the sum of Euclidean displacement magnitudes, not force, energy, or a complete actuator model. The output includes each command, predicted positions, pre/post RMSE, budget consumed, and limitations. This is a controlled baseline, not a full dynamic mechanics solver.
+
+Run both test groups:
+
+```bash
+pytest -q tests/test_qpie_resonance_bridge.py tests/test_qpie_resonance_bridge_control.py
+```
