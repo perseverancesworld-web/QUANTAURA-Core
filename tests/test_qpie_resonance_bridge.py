@@ -133,3 +133,12 @@ def test_experiment_record_is_deterministic_and_hashed():
     assert first["sha256"] == second["sha256"]
     assert len(first["sha256"]) == 64
     assert first["schema"] == "qpie.resonance-bridge.experiment.v0.2"
+
+def test_ac_nodal_solver_matches_hand_derived_two_node_solution():
+    # At DC: each node has 1 S to ground, the connecting resistor is 1 ohm (1 S),
+    # and 1 A enters node a. Y=[[2,-1],[-1,2]], so V=[2/3,1/3].
+    voltages = solve_ac_network(small_grounded_model(), 0.0, {"a": 1.0 + 0j})
+    assert voltages["a"].real == pytest.approx(2.0 / 3.0)
+    assert voltages["b"].real == pytest.approx(1.0 / 3.0)
+    assert voltages["a"].imag == pytest.approx(0.0, abs=1e-12)
+    assert voltages["b"].imag == pytest.approx(0.0, abs=1e-12)
