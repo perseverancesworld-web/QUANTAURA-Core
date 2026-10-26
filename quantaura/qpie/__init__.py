@@ -42,6 +42,13 @@ from quantaura.qpie.resonance_bridge import (
     to_physical_state_space,
 )
 from quantaura.qpie.resonance_bridge_control import run_controller_benchmark
+from quantaura.qpie.resonance_bridge_quantum import (
+    GraphHamiltonian,
+    build_graph_hamiltonian,
+    diagonalize_graph_hamiltonian,
+    gauge_invariance_report,
+    gauge_transform_hamiltonian,
+)
 
 __all__ = [
     "PhysicalStateSpace",
@@ -90,4 +97,9 @@ __all__ = [
     "solve_ac_network",
     "to_physical_state_space",
     "run_controller_benchmark",
+    "GraphHamiltonian",
+    "build_graph_hamiltonian",
+    "diagonalize_graph_hamiltonian",
+    "gauge_invariance_report",
+    "gauge_transform_hamiltonian",
 ]
