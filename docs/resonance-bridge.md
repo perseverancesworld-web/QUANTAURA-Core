@@ -91,3 +91,12 @@ report = gauge_invariance_report(operator, {"node-0": 0.3, "node-1": -0.2})
 assert report["passed"]
 ```
 
+## Integrated smoke-test example
+
+Run the synthetic, no-side-effect example to exercise the layers together:
+
+```bash
+python examples/resonance_bridge_demo.py > resonance_bridge_record.json
+```
+
+The record includes AC node voltages, a 50-ohm-reference Smith-chart point, edge-fault sensitivity, matched-budget controller results, a small graph-Hamiltonian spectrum, a gauge-invariance report, model parameters, limitations, and a SHA-256 hash. All inputs are synthetic; the record is marked CANDIDATE.
