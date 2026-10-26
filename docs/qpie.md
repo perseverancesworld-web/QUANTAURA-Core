@@ -45,3 +45,5 @@ See [Resonance Bridge documentation](resonance-bridge.md) and run:
 ```bash
 pytest -q tests/test_qpie_resonance_bridge.py
 ```
+
+The Resonance Bridge also exposes a Hermitian graph-operator adapter for small-system exact diagonalization and local gauge-transform invariance checks. See [Resonance Bridge documentation](resonance-bridge.md). These checks validate the declared matrix model, not a physical quantum device or quantum advantage.
