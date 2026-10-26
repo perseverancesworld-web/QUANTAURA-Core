@@ -104,3 +104,7 @@ The record includes AC node voltages, a 50-ohm-reference Smith-chart point, edge
 ## Matched-model safeguards
 
 The matched-model report checks more than node count and abstract coupling budget. It separately reports equality of node parameters, declared branch R/L/C parameters, dynamic weights, and link phases. This allows an experiment to state precisely whether two runs differ only by link phases or whether circuit or graph parameters also changed. Numerical model equivalence still depends on the validity of the chosen model.
+
+## Smith-chart rendering data
+
+`smith_chart_grid_data` provides renderer-neutral point sets for constant normalized resistance curves, constant normalized reactance curves, and the unit-circle boundary. A dashboard can plot these arrays with its chosen visualization library; this module adds no plotting dependency. The generated loci are geometry from the transform, not measured data.
