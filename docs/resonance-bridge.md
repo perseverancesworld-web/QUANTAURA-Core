@@ -67,3 +67,27 @@ Run both test groups:
 ```bash
 pytest -q tests/test_qpie_resonance_bridge.py tests/test_qpie_resonance_bridge_control.py
 ```
+
+## Hermitian graph operator and gauge invariance
+
+The separate quantum-math adapter builds a dense tight-binding-style graph Hamiltonian from the explicit graph topology and link phases. Its convention is:
+
+`H[source,target] = -t exp(+i phi)`; the reverse link is the complex conjugate. Local basis changes use `H' = U H U†`, with `U_ii = exp(i theta_i)`.
+
+The adapter checks Hermiticity, performs dense exact diagonalization for small graphs, and tests whether the eigenvalue spectrum is invariant under the local basis transformation. This provides a reproducible discrete-operator / U(1)-style gauge check related mathematically to QPIE's lattice-gauge work. It is not a quantum-hardware simulator, does not prove coupling to a physical device, and makes no quantum-advantage claim.
+
+Example:
+
+```python
+from quantaura.qpie import (
+    build_graph_hamiltonian,
+    diagonalize_graph_hamiltonian,
+    gauge_invariance_report,
+)
+
+operator = build_graph_hamiltonian(network_model)
+spectrum = diagonalize_graph_hamiltonian(operator)
+report = gauge_invariance_report(operator, {"node-0": 0.3, "node-1": -0.2})
+assert report["passed"]
+```
+
