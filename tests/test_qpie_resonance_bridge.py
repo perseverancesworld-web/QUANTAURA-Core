@@ -142,3 +142,15 @@ def test_ac_nodal_solver_matches_hand_derived_two_node_solution():
     assert voltages["b"].real == pytest.approx(1.0 / 3.0)
     assert voltages["a"].imag == pytest.approx(0.0, abs=1e-12)
     assert voltages["b"].imag == pytest.approx(0.0, abs=1e-12)
+
+def test_mechanical_bond_fault_does_not_rewrite_delaunay_geometry():
+    pytest.importorskip("scipy")
+    graph = MechanicalGraph(
+        positions={"a": (0, 0), "b": (1, 0), "c": (1, 1), "d": (0, 1)},
+        bonds=[MechanicalBond("ab", "a", "b"), MechanicalBond("bc", "b", "c")],
+    )
+    geometric_neighbors = delaunay_edges(graph.positions)
+    faulted = graph.without_bonds(["ab"])
+    assert delaunay_edges(faulted.positions) == geometric_neighbors
+    assert ("a", "b") in geometric_neighbors
+    assert all(bond.bond_id != "ab" for bond in faulted.bonds)
