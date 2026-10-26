@@ -47,3 +47,5 @@ pytest -q tests/test_qpie_resonance_bridge.py
 ```
 
 The Resonance Bridge also exposes a Hermitian graph-operator adapter for small-system exact diagonalization and local gauge-transform invariance checks. See [Resonance Bridge documentation](resonance-bridge.md). These checks validate the declared matrix model, not a physical quantum device or quantum advantage.
+
+Run the full synthetic Resonance Bridge integration example with `python examples/resonance_bridge_demo.py`. It writes a candidate experiment record and performs no physical actuation.
