@@ -154,3 +154,17 @@ def test_mechanical_bond_fault_does_not_rewrite_delaunay_geometry():
     assert delaunay_edges(faulted.positions) == geometric_neighbors
     assert ("a", "b") in geometric_neighbors
     assert all(bond.bond_id != "ab" for bond in faulted.bonds)
+
+def test_smith_chart_grid_data_is_plot_ready_and_passive():
+    from quantaura.qpie.resonance_bridge import smith_chart_grid_data
+
+    grid = smith_chart_grid_data(resistance_values=(0.0, 1.0),
+                                 reactance_values=(-1.0, 0.0, 1.0),
+                                 samples=31, extent=2.0)
+    assert grid["schema"].endswith("smith-grid.v0.1")
+    assert len(grid["constant_resistance"]["1.0"]) == 31
+    assert len(grid["unit_circle_boundary"]) == 31
+    for curve in grid["constant_resistance"].values():
+        assert all((x * x + y * y) ** 0.5 <= 1.0 + 1e-12 for x, y in curve)
+    for curve in grid["constant_reactance"].values():
+        assert all((x * x + y * y) ** 0.5 <= 1.0 + 1e-12 for x, y in curve)
