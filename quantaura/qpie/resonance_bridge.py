@@ -324,27 +324,56 @@ def mechanical_to_network(graph: MechanicalGraph,
 
 def matched_model_comparison(baseline: NetworkModel, candidate: NetworkModel,
                              tolerance: float = 1e-9) -> dict[str, Any]:
-    """Verify that node set, topology, and abstract coupling budget are matched."""
+    """Check nodes, topology, budgets, dynamic terms, and declared circuit components."""
     if not math.isfinite(tolerance) or tolerance < 0:
         raise ValueError("tolerance must be finite and nonnegative.")
     baseline.validate()
     candidate.validate()
+
     def signature(model):
         return {
             "nodes": sorted(n.node_id for n in model.nodes),
-            "edges": sorted(tuple(sorted((e.source, e.target))) for e in model.edges),
+            "topology": sorted(tuple(sorted((e.source, e.target))) for e in model.edges),
             "edge_count": len(model.edges),
             "coupling_budget": sum(e.coupling_weight for e in model.edges),
+            "node_parameters": sorted(
+                (n.node_id, n.shunt_conductance_s, n.shunt_capacitance_f,
+                 n.state_capacitance, n.leak) for n in model.nodes
+            ),
+            "branch_parameters": sorted(
+                (e.edge_id, tuple(sorted((e.source, e.target))),
+                 e.electrical.resistance_ohm, e.electrical.inductance_h,
+                 e.electrical.capacitance_f) for e in model.edges
+            ),
+            "dynamic_parameters": sorted(
+                (e.edge_id, e.coupling_weight) for e in model.edges
+            ),
+            "link_phases": sorted(
+                (e.edge_id, e.source, e.target, e.phase_rad) for e in model.edges
+            ),
         }
+
     a, b = signature(baseline), signature(candidate)
-    return {
+    flags = {
         "matched_nodes": a["nodes"] == b["nodes"],
-        "matched_topology": a["edges"] == b["edges"],
+        "matched_topology": a["topology"] == b["topology"],
         "matched_edge_count": a["edge_count"] == b["edge_count"],
         "matched_coupling_budget": abs(a["coupling_budget"] - b["coupling_budget"]) <= tolerance,
-        "baseline": a, "candidate": b, "tolerance": tolerance,
+        "matched_node_parameters": a["node_parameters"] == b["node_parameters"],
+        "matched_branch_parameters": a["branch_parameters"] == b["branch_parameters"],
+        "matched_dynamic_parameters": a["dynamic_parameters"] == b["dynamic_parameters"],
+        "matched_link_phases": a["link_phases"] == b["link_phases"],
     }
-
+    return {
+        **flags,
+        "matched_except_link_phases": all(
+            flags[key] for key in flags if key != "matched_link_phases"
+        ),
+        "matched_complete_model": all(flags.values()),
+        "baseline": a,
+        "candidate": b,
+        "tolerance": tolerance,
+    }
 
 def fault_sensitivity_report(model: NetworkModel, frequency_hz: float,
                              current_injections_a: Mapping[str, complex],
