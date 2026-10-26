@@ -41,6 +41,7 @@ from quantaura.qpie.resonance_bridge import (
     solve_ac_network,
     to_physical_state_space,
 )
+from quantaura.qpie.resonance_bridge_control import run_controller_benchmark
 
 __all__ = [
     "PhysicalStateSpace",
@@ -88,4 +89,5 @@ __all__ = [
     "smith_metrics",
     "solve_ac_network",
     "to_physical_state_space",
+    "run_controller_benchmark",
 ]
