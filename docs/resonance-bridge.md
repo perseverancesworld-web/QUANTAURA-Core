@@ -100,3 +100,7 @@ python examples/resonance_bridge_demo.py > resonance_bridge_record.json
 ```
 
 The record includes AC node voltages, a 50-ohm-reference Smith-chart point, edge-fault sensitivity, matched-budget controller results, a small graph-Hamiltonian spectrum, a gauge-invariance report, model parameters, limitations, and a SHA-256 hash. All inputs are synthetic; the record is marked CANDIDATE.
+
+## Matched-model safeguards
+
+The matched-model report checks more than node count and abstract coupling budget. It separately reports equality of node parameters, declared branch R/L/C parameters, dynamic weights, and link phases. This allows an experiment to state precisely whether two runs differ only by link phases or whether circuit or graph parameters also changed. Numerical model equivalence still depends on the validity of the chosen model.
