@@ -4,7 +4,7 @@ A computational laboratory for discovering emergent physics in coupled systems.
 PRISM-MATTER is the programmable-material subsystem.
 
 Core invariant (engine-level): no Tier-5 physics claims without human process.
-Authorization of *actions* remains with the Execution Authorization Kernel.
+Authorization of actions remains with the Execution Authorization Kernel.
 """
 
 from quantaura.qpie.state_space import PhysicalStateSpace, empty_lattice_state
@@ -19,6 +19,37 @@ from quantaura.qpie.firewall import DiscoveryTier, classify_candidate
 from quantaura.qpie.observatory import Observatory, PhysicalStateAgent
 from quantaura.qpie.prism import MaterialConfiguration, default_metamaterial_seed
 from quantaura.qpie.benchmarks.known_solutions import run_all_benchmarks
+from quantaura.qpie.resonance_bridge import (
+    EdgeElectricalSpec,
+    EvidenceStatus,
+    MechanicalBond,
+    MechanicalGraph,
+    NetworkEdge,
+    NetworkModel,
+    NetworkNode,
+    SeriesRLC,
+    delaunay_edges,
+    evaluate_promotion_gate,
+    fault_sensitivity_report,
+    gamma_to_impedance,
+    impedance_to_gamma,
+    make_experiment_record,
+    matched_model_comparison,
+    mechanical_to_network,
+    propagate_complex_state,
+    smith_metrics,
+    smith_chart_grid_data,
+    solve_ac_network,
+    to_physical_state_space,
+)
+from quantaura.qpie.resonance_bridge_control import run_controller_benchmark
+from quantaura.qpie.resonance_bridge_quantum import (
+    GraphHamiltonian,
+    build_graph_hamiltonian,
+    diagonalize_graph_hamiltonian,
+    gauge_invariance_report,
+    gauge_transform_hamiltonian,
+)
 
 __all__ = [
     "PhysicalStateSpace",
@@ -46,4 +77,31 @@ __all__ = [
     "MaterialConfiguration",
     "default_metamaterial_seed",
     "run_all_benchmarks",
+    "EdgeElectricalSpec",
+    "EvidenceStatus",
+    "MechanicalBond",
+    "MechanicalGraph",
+    "NetworkEdge",
+    "NetworkModel",
+    "NetworkNode",
+    "SeriesRLC",
+    "delaunay_edges",
+    "evaluate_promotion_gate",
+    "fault_sensitivity_report",
+    "gamma_to_impedance",
+    "impedance_to_gamma",
+    "make_experiment_record",
+    "matched_model_comparison",
+    "mechanical_to_network",
+    "propagate_complex_state",
+    "smith_metrics",
+    "smith_chart_grid_data",
+    "solve_ac_network",
+    "to_physical_state_space",
+    "run_controller_benchmark",
+    "GraphHamiltonian",
+    "build_graph_hamiltonian",
+    "diagonalize_graph_hamiltonian",
+    "gauge_invariance_report",
+    "gauge_transform_hamiltonian",
 ]

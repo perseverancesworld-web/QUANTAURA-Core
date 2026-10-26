@@ -32,4 +32,20 @@ curl localhost:8000/v1/qpie/benchmarks
 export QUANTAURA_QPIE_STORE=/tmp/qpie.sqlite
 ```
 
-Hypotheses and anomalies persist when a file path is set (default `:memory:`).
+Hypotheses and anomalies persist when a file path is set (default :memory:).
+
+## Resonance Bridge
+
+The Resonance Bridge module adds Smith-chart transforms, lumped RLC branch models, complex AC nodal analysis, a separately labeled graph-dynamics model, mechanical-bond adapters, Delaunay geometric-neighbor extraction, fault-sensitivity experiments, and integrity-hashed evidence records.
+
+Its boundaries matter: geometric adjacency is not mechanical topology; impedance is not inferred from bond length without an explicit model; candidate records do not validate new physics or authorize actuation.
+
+See [Resonance Bridge documentation](resonance-bridge.md) and run:
+
+```bash
+pytest -q tests/test_qpie_resonance_bridge.py
+```
+
+The Resonance Bridge also exposes a Hermitian graph-operator adapter for small-system exact diagonalization and local gauge-transform invariance checks. See [Resonance Bridge documentation](resonance-bridge.md). These checks validate the declared matrix model, not a physical quantum device or quantum advantage.
+
+Run the full synthetic Resonance Bridge integration example with `python examples/resonance_bridge_demo.py`. It writes a candidate experiment record and performs no physical actuation.
