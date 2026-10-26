@@ -38,6 +38,7 @@ from quantaura.qpie.resonance_bridge import (
     mechanical_to_network,
     propagate_complex_state,
     smith_metrics,
+    smith_chart_grid_data,
     solve_ac_network,
     to_physical_state_space,
 )
@@ -94,6 +95,7 @@ __all__ = [
     "mechanical_to_network",
     "propagate_complex_state",
     "smith_metrics",
+    "smith_chart_grid_data",
     "solve_ac_network",
     "to_physical_state_space",
     "run_controller_benchmark",
