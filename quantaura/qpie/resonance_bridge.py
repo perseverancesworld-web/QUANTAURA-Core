@@ -54,6 +54,59 @@ def smith_metrics(z_normalized: complex) -> dict[str, Any]:
     }
 
 
+
+def smith_chart_grid_data(
+    resistance_values: Iterable[float] = (0.0, 0.2, 0.5, 1.0, 2.0, 5.0),
+    reactance_values: Iterable[float] = (-5.0, -2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0, 5.0),
+    samples: int = 241,
+    extent: float = 5.0,
+) -> dict[str, Any]:
+    """Generate plot-ready Smith-chart loci without a plotting dependency.
+
+    Resistance and reactance are normalized to the reference impedance. The
+    generated constant-resistance / constant-reactance samples cover the passive
+    half-plane (r >= 0); the unit-circle boundary is returned separately.
+    """
+    if not isinstance(samples, int) or samples < 2:
+        raise ValueError("samples must be an integer >= 2.")
+    if not math.isfinite(extent) or extent <= 0:
+        raise ValueError("extent must be finite and positive.")
+    r_values = [float(value) for value in resistance_values]
+    x_values = [float(value) for value in reactance_values]
+    if any(not math.isfinite(value) or value < 0 for value in r_values):
+        raise ValueError("Normalized resistance values must be finite and nonnegative.")
+    if any(not math.isfinite(value) for value in x_values):
+        raise ValueError("Normalized reactance values must be finite.")
+    x_sweep = np.linspace(-extent, extent, samples)
+    r_sweep = np.linspace(0.0, extent, samples)
+
+    def locus(points):
+        output = []
+        for r, x in points:
+            gamma = impedance_to_gamma(complex(float(r), float(x)))
+            output.append([float(gamma.real), float(gamma.imag)])
+        return output
+
+    constant_resistance = {
+        str(r): locus([(r, x) for x in x_sweep]) for r in r_values
+    }
+    constant_reactance = {
+        str(x): locus([(r, x) for r in r_sweep]) for x in x_values
+    }
+    boundary = [[float(math.cos(t)), float(math.sin(t))]
+                for t in np.linspace(0.0, 2.0 * math.pi, samples)]
+    return {
+        "schema": "qpie.resonance-bridge.smith-grid.v0.1",
+        "normalization": "z = R/R_ref + j X/R_ref",
+        "constant_resistance": constant_resistance,
+        "constant_reactance": constant_reactance,
+        "unit_circle_boundary": boundary,
+        "samples_per_locus": samples,
+        "extent": extent,
+        "limitations": ["plot geometry only; not measured data",
+                        "resistance curves assume normalized resistance r >= 0"],
+    }
+
 def _nonnegative(name: str, value: float) -> float:
     value = float(value)
     if not math.isfinite(value) or value < 0:
