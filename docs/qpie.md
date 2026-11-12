@@ -57,3 +57,43 @@ export QUANTAURA_QPIE_STORE=/tmp/qpie.sqlite
 ```
 
 Hypotheses and anomalies persist when a file path is set (default `:memory:`).
+
+
+## Rhythmic dynamics and energy balance
+
+The `quantaura.qpie.rhythm` module integrates coupled second-order systems:
+
+```
+M x'' + C x' + K x + beta*x^3 = B u(t)
+```
+
+It records kinetic + quadratic/quartic potential energy, cumulative input
+work, cumulative viscous dissipation, and the resulting energy-balance
+residual. The model is intentionally explicit about where energy enters and
+leaves. Periodic driving can create resonance, but resonance does not create
+energy.
+
+```python
+import numpy as np
+from quantaura.qpie.rhythm import simulate_rhythmic_network
+
+run = simulate_rhythmic_network(
+    mass=np.array([1.0]),
+    damping=np.array([0.08]),
+    stiffness=np.array([4.0]),
+    initial_position=np.array([0.0]),
+    initial_velocity=np.array([0.0]),
+    dt=0.001,
+    steps=5000,
+    drive=lambda t: np.array([np.sin(2.0*t)]),
+)
+print(run.energy[-1])
+print(run.cumulative_input_work[-1])
+print(run.cumulative_dissipation[-1])
+print(run.max_abs_energy_balance_residual)
+```
+
+For PRISM-MATTER, construct `K` from the persistent mechanical graph and
+keep the changing geometric-neighborhood graph as a separate input to the
+controller or constitutive model. This preserves the distinction between
+geometry and load-bearing topology.
