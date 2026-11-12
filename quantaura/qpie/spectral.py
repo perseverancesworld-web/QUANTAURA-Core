@@ -188,3 +188,45 @@ def stiffness_mode_frequencies(
         raise ValueError("stiffness must be positive semidefinite")
     positive = eigenvalues[eigenvalues > tolerance]
     return np.sqrt(positive / mass) / (2.0 * np.pi)
+
+def uniform_flux_gauge(
+    nx: int,
+    ny: int,
+    flux_per_plaquette: float,
+) -> LatticeGaugeU1:
+    """Construct a periodic U(1) torus with uniform plaquette flux.
+
+    Periodic torus consistency requires total flux nx*ny*B to be an integer
+    multiple of 2*pi. The returned link angles use a Landau-style gauge with
+    a compensating boundary link. Plaquette holonomies, not raw angle sums,
+    carry the gauge-invariant flux.
+    """
+
+    if not isinstance(nx, int) or not isinstance(ny, int) or nx < 3 or ny < 3:
+        raise ValueError("nx and ny must be integers >= 3")
+    if not np.isfinite(flux_per_plaquette):
+        raise ValueError("flux_per_plaquette must be finite")
+
+    total_flux_quanta = flux_per_plaquette * nx * ny / (2.0 * np.pi)
+    if not np.isclose(total_flux_quanta, np.rint(total_flux_quanta), atol=1e-10, rtol=0.0):
+        raise ValueError(
+            "periodic torus requires nx*ny*flux_per_plaquette to be a multiple of 2*pi"
+        )
+
+    theta_x = np.zeros((nx, ny), dtype=float)
+    theta_y = np.repeat(
+        (flux_per_plaquette * np.arange(nx, dtype=float))[:, None],
+        ny,
+        axis=1,
+    )
+    theta_x[-1, :] = -flux_per_plaquette * nx * np.arange(ny, dtype=float)
+    theta_x = np.angle(np.exp(1j * theta_x))
+    theta_y = np.angle(np.exp(1j * theta_y))
+    return LatticeGaugeU1(theta_x=theta_x, theta_y=theta_y)
+
+
+def principal_plaquette_phase(gauge: LatticeGaugeU1) -> np.ndarray:
+    """Return gauge-invariant plaquette angles in the principal interval."""
+
+    return np.angle(np.exp(1j * gauge.plaquette_phase()))
+
