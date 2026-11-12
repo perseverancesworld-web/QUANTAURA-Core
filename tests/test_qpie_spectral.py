@@ -70,3 +70,18 @@ def test_stiffness_mode_frequencies_omit_rigid_mode():
 def test_stiffness_rejects_negative_mode():
     with pytest.raises(ValueError):
         stiffness_mode_frequencies(np.diag([-0.1, 1.0]))
+
+def test_uniform_flux_torus_plaquettes_and_quantization():
+    from quantaura.qpie.spectral import (
+        principal_plaquette_phase,
+        uniform_flux_gauge,
+    )
+
+    for flux in (0.0, np.pi / 6.0, np.pi / 3.0, np.pi / 2.0):
+        gauge = uniform_flux_gauge(12, 12, flux)
+        measured = principal_plaquette_phase(gauge)
+        assert np.allclose(measured, flux, atol=1e-10)
+
+    with pytest.raises(ValueError):
+        uniform_flux_gauge(12, 12, 0.123)
+
