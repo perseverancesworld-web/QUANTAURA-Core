@@ -97,3 +97,19 @@ For PRISM-MATTER, construct `K` from the persistent mechanical graph and
 keep the changing geometric-neighborhood graph as a separate input to the
 controller or constitutive model. This preserves the distinction between
 geometry and load-bearing topology.
+
+For the STH-1 12 x 12 periodic torus, the uniform-flux constructor supports
+the flux-per-plaquette scan 0, pi/6, pi/3, pi/2 (each satisfies total-flux
+quantization on 144 plaquettes):
+
+```bash
+python examples/qpie_sth1_flux_scan.py
+```
+
+The scan reports Hermiticity residuals, low-lying eigenvalues, rounded mode
+degeneracies, and plaquette holonomy. Local U(1) gauge changes must preserve
+the spectrum. See `docs/russell_tesla_bridge.md` for the complete historical
+evidence ledger and research hypotheses.
+
+A coupled two-degree-of-freedom oscillator demo is available at
+`examples/qpie_rhythm_demo.py`.
