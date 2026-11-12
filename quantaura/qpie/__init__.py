@@ -20,6 +20,7 @@ from quantaura.qpie.spectral import (
     octave_histogram,
     stiffness_mode_frequencies,
 )
+from quantaura.qpie.rhythm import RhythmSimulation, simulate_rhythmic_network
 from quantaura.qpie.vortex import helicity_3d, vorticity_2d
 from quantaura.qpie.causal import CausalPhysicsGraph, default_physics_graph
 from quantaura.qpie.transition import Certificate, Transition, make_transition
@@ -46,6 +47,8 @@ __all__ = [
     "frequencies_to_octave_bins",
     "octave_histogram",
     "stiffness_mode_frequencies",
+    "RhythmSimulation",
+    "simulate_rhythmic_network",
     "helicity_3d",
     "vorticity_2d",
     "CausalPhysicsGraph",
