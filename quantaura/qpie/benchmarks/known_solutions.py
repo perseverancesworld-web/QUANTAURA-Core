@@ -49,6 +49,51 @@ def test_dec_conservation() -> dict[str, Any]:
     return {"name": "dec_conservation", **rep}
 
 
+
+
+def test_rhythmic_energy_balance() -> dict[str, Any]:
+    from quantaura.qpie.rhythm import simulate_rhythmic_network
+
+    result = simulate_rhythmic_network(
+        mass=np.array([1.0]),
+        damping=np.array([0.15]),
+        stiffness=np.array([4.0]),
+        initial_position=np.array([0.0]),
+        initial_velocity=np.array([0.0]),
+        dt=0.001,
+        steps=4000,
+        drive=lambda t: np.array([np.sin(2.0 * t)]),
+    )
+    residual = result.max_abs_energy_balance_residual
+    return {
+        "name": "rhythmic_energy_balance",
+        "passed": bool(residual < 1e-4),
+        "energy_balance_residual": residual,
+        "input_work": float(result.cumulative_input_work[-1]),
+        "dissipation": float(result.cumulative_dissipation[-1]),
+    }
+
+
+def test_spectral_gauge_invariance() -> dict[str, Any]:
+    from quantaura.qpie.spectral import (
+        gauge_covariant_hamiltonian,
+        gauge_transform,
+        hermitian_spectrum,
+    )
+
+    gauge = LatticeGaugeU1.random(4, 5, scale=0.25, seed=27)
+    alpha = np.random.default_rng(28).uniform(-np.pi, np.pi, size=(4, 5))
+    e0 = hermitian_spectrum(gauge_covariant_hamiltonian(gauge)).eigenvalues
+    e1 = hermitian_spectrum(
+        gauge_covariant_hamiltonian(gauge_transform(gauge, alpha))
+    ).eigenvalues
+    residual = float(np.max(np.abs(e0 - e1)))
+    return {
+        "name": "spectral_gauge_invariance",
+        "passed": bool(residual < 1e-10),
+        "spectrum_residual": residual,
+    }
+
 def run_all_benchmarks() -> list[dict[str, Any]]:
     results = [
         test_plaquette_identity_flat(),
@@ -57,6 +102,8 @@ def run_all_benchmarks() -> list[dict[str, Any]]:
         test_dec_conservation(),
     ]
     results.extend(topology_validation_suite())
+    results.append(test_rhythmic_energy_balance())
+    results.append(test_spectral_gauge_invariance())
     results.append(skyrmion_q_vs_resolution([16, 24, 32, 48]))
     try:
         results.append(cross_validate_ed_tn(4))
