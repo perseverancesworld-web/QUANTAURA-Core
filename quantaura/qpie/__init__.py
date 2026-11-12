@@ -11,6 +11,18 @@ from quantaura.qpie.state_space import PhysicalStateSpace, empty_lattice_state
 from quantaura.qpie.geometry import CommonGeometry, FormDegree, regular_grid_2d
 from quantaura.qpie.gauge import LatticeGaugeU1, schwinger_like_hamiltonian_coeffs
 from quantaura.qpie.topology import hopf_proxy_3d, skyrmion_density_2d
+from quantaura.qpie.spectral import (
+    SpectrumReport,
+    frequencies_to_octave_bins,
+    gauge_covariant_hamiltonian,
+    gauge_transform,
+    hermitian_spectrum,
+    octave_histogram,
+    stiffness_mode_frequencies,
+    principal_plaquette_phase,
+    uniform_flux_gauge,
+)
+from quantaura.qpie.rhythm import RhythmSimulation, simulate_rhythmic_network
 from quantaura.qpie.vortex import helicity_3d, vorticity_2d
 from quantaura.qpie.causal import CausalPhysicsGraph, default_physics_graph
 from quantaura.qpie.transition import Certificate, Transition, make_transition
@@ -30,6 +42,17 @@ __all__ = [
     "schwinger_like_hamiltonian_coeffs",
     "hopf_proxy_3d",
     "skyrmion_density_2d",
+    "SpectrumReport",
+    "gauge_covariant_hamiltonian",
+    "gauge_transform",
+    "hermitian_spectrum",
+    "frequencies_to_octave_bins",
+    "octave_histogram",
+    "stiffness_mode_frequencies",
+    "principal_plaquette_phase",
+    "uniform_flux_gauge",
+    "RhythmSimulation",
+    "simulate_rhythmic_network",
     "helicity_3d",
     "vorticity_2d",
     "CausalPhysicsGraph",
