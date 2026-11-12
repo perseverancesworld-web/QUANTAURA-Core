@@ -19,6 +19,8 @@ from quantaura.qpie.spectral import (
     hermitian_spectrum,
     octave_histogram,
     stiffness_mode_frequencies,
+    principal_plaquette_phase,
+    uniform_flux_gauge,
 )
 from quantaura.qpie.rhythm import RhythmSimulation, simulate_rhythmic_network
 from quantaura.qpie.vortex import helicity_3d, vorticity_2d
@@ -47,6 +49,8 @@ __all__ = [
     "frequencies_to_octave_bins",
     "octave_histogram",
     "stiffness_mode_frequencies",
+    "principal_plaquette_phase",
+    "uniform_flux_gauge",
     "RhythmSimulation",
     "simulate_rhythmic_network",
     "helicity_3d",
