@@ -94,6 +94,29 @@ def test_spectral_gauge_invariance() -> dict[str, Any]:
         "spectrum_residual": residual,
     }
 
+
+
+def test_uniform_flux_torus() -> dict[str, Any]:
+    from quantaura.qpie.spectral import (
+        principal_plaquette_phase,
+        uniform_flux_gauge,
+    )
+
+    fluxes = (0.0, np.pi / 6.0, np.pi / 3.0, np.pi / 2.0)
+    residuals = []
+    for flux in fluxes:
+        gauge = uniform_flux_gauge(12, 12, flux)
+        residuals.append(
+            float(np.max(np.abs(principal_plaquette_phase(gauge) - flux)))
+        )
+    residual = max(residuals, default=0.0)
+    return {
+        "name": "sth1_uniform_flux_torus",
+        "passed": bool(residual < 1e-10),
+        "max_plaquette_residual": residual,
+        "fluxes": [float(v) for v in fluxes],
+    }
+
 def run_all_benchmarks() -> list[dict[str, Any]]:
     results = [
         test_plaquette_identity_flat(),
@@ -104,6 +127,7 @@ def run_all_benchmarks() -> list[dict[str, Any]]:
     results.extend(topology_validation_suite())
     results.append(test_rhythmic_energy_balance())
     results.append(test_spectral_gauge_invariance())
+    results.append(test_uniform_flux_torus())
     results.append(skyrmion_q_vs_resolution([16, 24, 32, 48]))
     try:
         results.append(cross_validate_ed_tn(4))
